@@ -15,9 +15,12 @@ entity MIPS_ControlUnit is
            MemToReg : out STD_LOGIC_VECTOR (1 downto 0);
            RegWrite : out STD_LOGIC;
            ALUSrcA : out STD_LOGIC;
+           AuxJr : out STD_LOGIC;
            ALUSrcB : out STD_LOGIC_VECTOR (1 downto 0);
            ALUOp : out STD_LOGIC_VECTOR (2 downto 0);
            PCSrc : out STD_LOGIC_VECTOR (1 downto 0));
+
+           
 end MIPS_ControlUnit;
 
 architecture Behavioral of MIPS_ControlUnit is
@@ -50,6 +53,12 @@ begin
             -- Completion Jump
             elsif opcode = "000010" then
                 nextState <= "1001";
+            -- Addi
+            elsif opcode = "001000" then
+                nextState <= "1010";
+            -- Jal
+            elsif opcode = "000011" then 
+                nextState <= "1100";    
             end if;
         -- Address Computation -> ¿?
         elsif nextState = "0010" then
@@ -81,6 +90,17 @@ begin
         -- Completion Jump -> Fetch
         elsif nextState = "1001" then
             nextState <="0000";
+        -- execution addi -> Write Back Alu tipo I
+        elsif nextstate = "1010" then
+            nextState <= "1011";
+        -- Write Back Alu tipo I -> Fetch
+        elsif nextState = "1011" then
+            nextState <= "0000";
+        -- Write Back Jal -> Jump
+        elsif nextState = "1100" then
+            nextState <= "1001";
+        
+        
         end if;
     end if;
 end process;
@@ -113,6 +133,7 @@ begin
         ALUSrcA <='0';
         RegWrite <='0';
         RegDst <= "00";
+        AuxJr <= '0';
         
     -- Decode
     elsif currentState = "0001" then
@@ -129,6 +150,7 @@ begin
         ALUSrcA <='0';
         RegWrite <='0';
         RegDst <= "00";
+        AuxJr <= '0';
     
     -- Address Computation  
     elsif currentState = "0010" then
@@ -145,6 +167,7 @@ begin
         ALUSrcA <='1';
         RegWrite <='0';
         RegDst <= "00";
+        AuxJr <= '0';
         
     -- Memory Read
     elsif currentState = "0011" then
@@ -161,6 +184,7 @@ begin
         ALUSrcA <='0';
         RegWrite <='0';
         RegDst <= "00";
+        AuxJr <= '0';
 		  
 	-- Writeback Mem-RF
     elsif currentState = "0100" then
@@ -177,6 +201,7 @@ begin
         ALUSrcA <='0';
         RegWrite <='1';
         RegDst <= "00";
+        AuxJr <= '0';
 		  
     -- Memory Write
     elsif currentState = "0101" then
@@ -193,6 +218,7 @@ begin
         ALUSrcA <='0';
         RegWrite <='0';
         RegDst <= "00";
+        AuxJr <= '0';
         
     -- Execute 
     elsif currentState = "0110" then
@@ -209,6 +235,7 @@ begin
         ALUSrcA <='1';
         RegWrite <='0';
         RegDst <= "00";
+        AuxJr <= '0';
     
     -- Writeback ALU-RF
     elsif currentState = "0111" then
@@ -225,6 +252,7 @@ begin
         ALUSrcA <='0';
         RegWrite <='1';
         RegDst <= "01";
+        AuxJr <= '0';
 	
 	-- Completion Branch
     elsif currentState = "1000" then
@@ -241,6 +269,7 @@ begin
         ALUSrcA <= '1';
         RegWrite <= '0';
         RegDst <= "00";
+        AuxJr <= '0';
     
     -- Completion Jump
     elsif currentState = "1001" then
@@ -257,6 +286,58 @@ begin
         ALUSrcA <= '0';
         RegWrite <= '0';
         RegDst <= "00";
+        AuxJr <= '0';
+    
+    -- Execute Addi
+    elsif currentState = "1010" then
+        PCWrite <= '0';
+        Branch <= '0';
+        IorD <= '0';
+        MemRead <= '0';
+        MemWrite <= '0';
+        IRWrite <= '0';
+        MemToReg <= "00";
+        PCSrc <="00";
+        ALUOp <="000"; --AluOP in AluControl
+        ALUSrcB <= "10";
+        ALUSrcA <='1';
+        RegWrite <='0';
+        RegDst <= "00";
+        AuxJr <= '0';
+    
+    -- Writeback ALU-Tipo I
+    elsif currentState = "0111" then
+        PCWrite <= '0';
+        Branch <= '0';
+        IorD <= '0';
+        MemRead <= '0';
+        MemWrite <= '0';
+        IRWrite <= '0';
+        MemToReg <= "00";
+        PCSrc <="00";
+        ALUOp <="000";
+        ALUSrcB <= "00";
+        ALUSrcA <='0';
+        RegWrite <='1';
+        RegDst <= "00";
+        AuxJr <= '0';
+        
+    -- Writeback ALU-JAL
+    elsif currentState = "1100" then
+        PCWrite <= '0';
+        Branch <= '0';
+        IorD <= '0';
+        MemRead <= '0';
+        MemWrite <= '0';
+        IRWrite <= '0';
+        MemToReg <= "10"; --Acepta el PC
+        PCSrc <="00";
+        ALUOp <="000";
+        ALUSrcB <= "00";
+        ALUSrcA <='0';
+        RegWrite <='1';
+        RegDst <= "10"; --Acepta el registro ra
+        AuxJr <= '0';
     
     -- Wrong state failsafe (Set all signals to 0)
     else
@@ -273,6 +354,7 @@ begin
         ALUSrcA <= '0';
         RegWrite <= '0';
         RegDst <= "00";
+        AuxJr <= '0';
     
     end if;
 end process;

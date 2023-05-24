@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
-entity mux4to1_32b is
+entity mux4to1_32bC is
     Port ( A : in STD_LOGIC_VECTOR (31 downto 0);
            B : in STD_LOGIC_VECTOR (31 downto 0);
            C : in STD_LOGIC_VECTOR (31 downto 0);
@@ -9,9 +9,9 @@ entity mux4to1_32b is
            sel : in STD_LOGIC_VECTOR (1 downto 0);
            address : in STD_LOGIC_VECTOR (31 downto 0);
            muxOut : out STD_LOGIC_VECTOR (31 downto 0));
-end mux4to1_32b;
+end mux4to1_32bC;
 
-architecture Behavioral of mux4to1_32b is
+architecture Behavioral of mux4to1_32bC is
 
 begin
     

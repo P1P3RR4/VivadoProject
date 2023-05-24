@@ -10,7 +10,4 @@ architecture Behavioral of shift_left_2_32b is
 
 begin
 
-B(31 downto 2) <= A(29 downto 0);
-B(1 downto 0) <= "00";
-
 end Behavioral;

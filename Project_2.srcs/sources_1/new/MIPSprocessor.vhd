@@ -105,11 +105,6 @@ component shift_left_2_26to28b
            B : out STD_LOGIC_VECTOR (27 downto 0));
 end component;
 
-component shift_left_2_32b
-    Port ( A : in STD_LOGIC_VECTOR (31 downto 0);
-           B : out STD_LOGIC_VECTOR (31 downto 0));
-end component;
-
 component sign_extend
     Port ( A : in STD_LOGIC_VECTOR (15 downto 0);
            B : out STD_LOGIC_VECTOR (31 downto 0));
@@ -120,7 +115,7 @@ signal PCEnable, PCWrite, IRWrite, IorD, MemRead, MemWrite, Zero,
 signal RegDst, MemToReg, ALUSrcB, PCSrc : STD_LOGIC_VECTOR (1 downto 0);
 signal ALUOp : STD_LOGIC_VECTOR (2 downto 0);
 signal ALUcontrol_to_ALU : STD_LOGIC_VECTOR (3 downto 0);
-signal mux_RegDst_out : STD_LOGIC_VECTOR (4 downto 0);
+signal mux_RegDst_out, muxJr_PC : STD_LOGIC_VECTOR (4 downto 0);
 signal shiftLeft2Out : STD_LOGIC_VECTOR (27 downto 0);
 signal muxToPC, pcOut, memData, IROut, MDROut, regAin, regAout, regBin, regBout, 
        aluRegIn, aluRegOut, mux_MemToReg_out, signExtendOut, shiftAndPC,
@@ -184,6 +179,15 @@ MDR : MIPSregister
     dataIn => memData,
     dataOut => MDROut
 );
+-- error
+mux_Jr : mux3to1_5b
+    port map (
+    A => IROut(25 downto 21),
+    B => "11111",
+    C => "00000",
+    sel => ,
+    muxOut => muxJr_PC
+);
 
 mux_RegDst : mux3to1_5b
     port map (
@@ -222,12 +226,6 @@ signExtend_16b : sign_extend
     B => signExtendOut
 );
 
-shiftLeft_for_ALUSrcmux : shift_left_2_32b
-    port map(
-    A => signExtendOut,
-    B => shiftLeft1Out
-);
-
 regA : MIPSregister
     port map (
     reset => '0',
@@ -254,12 +252,11 @@ regB : MIPSregister
     dataOut => regBout 
     );
 
-mux_ALUSrcB : mux4to1_32b
+mux_ALUSrcB : mux3to1_32b
     port map(
     A => regBout,
-    B => "00000000000000000000000000000100",
+    B => "00000000000000000000000000000001",
     C => signExtendOut,
-    D => shiftLeft1Out,
     sel => ALUSrcB,
     muxOut => mux_ALUB_out
     );
@@ -289,13 +286,7 @@ ALUOutReg : MIPSregister
     dataOut => aluRegOut
     );
 
-shiftLeft_for_PCSrcmux : shift_left_2_26to28b
-    port map (
-    A => IROut(25 downto 0),
-    B => shiftLeft2Out
-    );
-
-mux_PCSrc_in3 <= shiftLeft2Out & "0000";
+mux_PCSrc_in3 <= pcOut(31 downto 26) & IROut(25 downto 0);
 
 mux_PCSrc : mux3to1_32b
     port map (

@@ -2,9 +2,9 @@
 -- Company: 
 -- Engineer: 
 -- 
--- Create Date: 19.05.2023 16:26:58
+-- Create Date: 20.05.2023 08:54:56
 -- Design Name: 
--- Module Name: Mux2to1_9b - Behavioral
+-- Module Name: mux4to1_32b - Behavioral
 -- Project Name: 
 -- Target Devices: 
 -- Tool Versions: 
@@ -31,17 +31,13 @@ use IEEE.STD_LOGIC_1164.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-entity Mux2to1_32b is
-    Port ( A : in STD_LOGIC_VECTOR (31 downto 0);
-           B : in STD_LOGIC_VECTOR (31 downto 0);
-           sel : in STD_LOGIC;
-           muxOut : out STD_LOGIC_VECTOR (31 downto 0));
-end Mux2to1_32b;
+entity mux4to1_32b is
+--  Port ( );
+end mux4to1_32b;
 
-architecture Behavioral of Mux2to1_32b is
+architecture Behavioral of mux4to1_32b is
 
 begin
-    muxOut <= A when sel = '0' else 
-              B;
+
 
 end Behavioral;
